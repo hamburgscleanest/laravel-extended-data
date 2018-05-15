@@ -2,8 +2,6 @@
 
 namespace hamburgscleanest\LaravelExtendedData\Tests;
 
-use Carbon\Carbon;
-use hamburgscleanest\LaravelExtendedData\Models\ExtendedData;
 use hamburgscleanest\LaravelExtendedData\Tests\Models\TestModel;
 
 class HasExtendedDataTest extends TestCase
@@ -57,6 +55,28 @@ class HasExtendedDataTest extends TestCase
         $tm->test = $expect;
 
         $this->assertEquals($expect, $tm->test);
+    }
+
+    /** @test */
+    public function it_calls_class_function_if_helper_isnt_found()
+    {
+        $tm = TestModel::create();
+
+        $this->expectException(\BadMethodCallException::class);
+
+        $tm->saveTest();
+
+    }
+
+    /** @test */
+    public function it_can_save_extended_data_with_given_helper()
+    {
+        $tm = TestModel::create();
+        $expect = '2018-01-01';
+
+        $ed = $tm->saveExtendedData('birthday', [$expect]);
+
+        $this->assertEquals($expect, (string)$ed->helper());
     }
 
 }

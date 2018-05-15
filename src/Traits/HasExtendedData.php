@@ -62,6 +62,44 @@ trait HasExtendedData
         return $this->edGetLatestOfType($name);
     }
 
+    /**
+     *
+     * @param string $callee
+     * @param string $prefix
+     * @return null|string
+     */
+    private function _getConcatenatedHelper(string $callee, string $prefix): ?string
+    {
+        $helper = null;
+
+        if (!Str::startsWith($callee, $prefix) || Str::length($prefix) < Str::length($prefix)) {
+            return null;
+        }
+
+        $helper = Str::camel(\explode($prefix, $callee)[1]);
+
+        if (!ExtendedData::helperExists($helper) || \array_key_exists($helper, $this->getAttributes())) {
+            return null;
+        }
+
+        return $helper;
+    }
+
+    /**
+     * Save an ExtendedData record with the helper.
+     * @param string $helperName
+     * @param $arguments
+     * @return ExtendedData
+     */
+    public function saveExtendedData(string $helperName, $arguments): ExtendedData
+    {
+        $ed = new ExtendedData(['helper' => $helperName]);
+        $ed->helper()->setValue(...$arguments);
+        $this->extended_data()->save($ed);
+
+        return $ed;
+    }
+
 
     /**
      * @param $name
@@ -70,25 +108,14 @@ trait HasExtendedData
      */
     public function __call($name, $arguments)
     {
-        $helper = "";
         $savePrefix = \config('laravel-extended-data.save_prefix', DEFAULT_SAVE_PREFIX);
 
-        if (Str::startsWith($name, $savePrefix) && \mb_strlen($name) > \mb_strlen($savePrefix)) {
-            $helper = Str::camel(\explode($savePrefix, $name)[1]);
+        if (!$helper = $this->_getConcatenatedHelper($name, $savePrefix)) {
+            return parent::__call($name, $arguments);
         }
 
-        $shouldCallHelper = !empty($helper) && ExtendedData::helperExists($helper) &&
-            !\array_key_exists($helper, $this->getAttributes());
 
-        if ($shouldCallHelper) {
-            $ed = new ExtendedData(['helper' => $helper]);
-            $ed->helper()->setValue(...$arguments);
-            $this->extended_data()->save($ed);
-
-            return $ed;
-        }
-
-        return parent::__call($name, $arguments);
+        return $this->saveExtendedData($helper, $arguments);
     }
 
 
