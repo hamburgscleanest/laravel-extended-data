@@ -41,7 +41,7 @@ class ExtendedData extends Model
     }
 
     /** @var AbstractHelper */
-    private $helperInstance;
+    private $_helperInstance;
 
     /**
      * @return MorphTo
@@ -64,11 +64,11 @@ class ExtendedData extends Model
             throw new HelperNotFoundException();
         }
 
-        if (!$this->helperInstance) {
-            $this->helperInstance = new $helperClassName($this);
+        if (!$this->_helperInstance) {
+            $this->_helperInstance = new $helperClassName($this);
         }
 
-        return $this->helperInstance;
+        return $this->_helperInstance;
     }
 
     /**
