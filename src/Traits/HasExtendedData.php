@@ -55,7 +55,7 @@ trait HasExtendedData
             return parent::__get($name);
         }
 
-        if (Str::plural($name) === $name) {
+        if ($this->_isPlural($name)) {
             return $this->edGetAllOfType(\str_singular($name));
         }
 
@@ -83,6 +83,16 @@ trait HasExtendedData
         }
 
         return $helper;
+    }
+
+
+    /**
+     * @param string $helperName
+     * @return bool
+     */
+    private function _isPlural(string $helperName): bool
+    {
+        return Str::plural($helperName) === $helperName;
     }
 
     /**

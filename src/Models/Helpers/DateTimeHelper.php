@@ -30,7 +30,7 @@ class DateTimeHelper extends AbstractHelper
      */
     public function setValue($value): ExtendedData
     {
-        if ($value instanceof Carbon || $value instanceof \DateTime) {
+        if ($value instanceof \DateTime) {
             $this->_extendedData->datetime_01 = $value->format($this->_getDateFormat());
         }
 
