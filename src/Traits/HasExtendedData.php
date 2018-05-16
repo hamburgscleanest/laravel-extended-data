@@ -63,7 +63,7 @@ trait HasExtendedData
     }
 
     /**
-     *
+     * Strips the helper name of a possible concatenation (e.g. saveSomething).
      * @param string $callee
      * @param string $prefix
      * @return null|string
@@ -77,8 +77,10 @@ trait HasExtendedData
         }
 
         $helper = Str::camel(\explode($prefix, $callee)[1]);
+        $helperSingular = Str::singular($helper);
 
-        if (!ExtendedData::helperExists($helper) || \array_key_exists($helper, $this->getAttributes())) {
+        if (!ExtendedData::helperExists($helperSingular) || \array_key_exists($helperSingular,
+                $this->getAttributes())) {
             return null;
         }
 
@@ -110,11 +112,27 @@ trait HasExtendedData
         return $ed;
     }
 
+    /**
+     * @param string $helperName
+     * @param $arguments
+     * @return Collection|\Traversable|array
+     */
+    public function saveExtendedDatas(string $helperName, $arguments): Collection
+    {
+        return $this->extended_data()->saveMany(collect($arguments)
+            ->map(function ($item) use ($helperName) {
+                $ed = new ExtendedData(['helper' => $helperName]);
+                $ed->helper()->setValue($item);
+
+                return $ed;
+            }));
+    }
+
 
     /**
      * @param $name
      * @param $arguments
-     * @return ExtendedData
+     * @return ExtendedData|Collection
      */
     public function __call($name, $arguments)
     {
@@ -125,7 +143,9 @@ trait HasExtendedData
         }
 
 
-        return $this->saveExtendedData($helper, $arguments);
+        return $this->_isPlural($helper)
+            ? $this->saveExtendedDatas(Str::singular($helper), $arguments)
+            : $this->saveExtendedData($helper, $arguments);
     }
 
 

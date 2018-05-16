@@ -79,4 +79,16 @@ class HasExtendedDataTest extends TestCase
         $this->assertEquals($expect, (string)$ed->helper());
     }
 
+    /** @test */
+    public function it_can_save_multiple_extended_datas_at_once()
+    {
+     $tm = TestModel::create();
+     $date1 = '2018-01-01';
+     $date2 = '2018-02-01';
+
+     $tm->saveBirthdays($date1, $date2);
+
+     $this->assertEquals(2, $tm->birthdays->count());
+    }
+
 }
