@@ -4,6 +4,7 @@ namespace hamburgscleanest\LaravelExtendedData\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ExtendedDataCollection extends Collection
 {
@@ -51,9 +52,20 @@ class ExtendedDataCollection extends Collection
         return $this;
     }
 
-    public function delete(): bool
+    public function delete(): self
     {
+        $arguments = \func_get_args();
+        /** @var Collection $items */
+        $items = collect($this->items);
 
+        if (!empty($arguments)) {
+            $items = $items->where(...$arguments);
+        }
+
+
+        DB::table('extended_datas')->whereIn('id', $items->pluck('id')->all())->delete();
+
+        return $this;
     }
 
     public function update($arguments): self
